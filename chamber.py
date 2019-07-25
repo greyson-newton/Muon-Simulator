@@ -3,6 +3,7 @@ from constants import *
 from numba import jit
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 class chamber:
     def __init__(self, idNumber, length, designX, designY, designAngle, actualX, actualY, actualAngle, accuracy):
@@ -170,7 +171,7 @@ class chamber:
                     if minValue > stdDev:
                         minValue = stdDev
                         correctedPostion = [xDis, yDis, angleDis]
-                    if fabs(stdDev) < self.accuracy:
+                    if abs(stdDev) > 0.001:
                         print("Job Complete")
                         self.DONE = True
                         break
