@@ -1,3 +1,4 @@
+#https://www.cs.uct.ac.za/mit_notes/python/Introduction_to_GUI_Programming.html
 from numba import jit
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
@@ -10,45 +11,51 @@ from circleIntersectLine import circleIntersectLine
 from propagateMuon import propagateMuon
 from chamber import chamber
 import numpy as np
-import pickle
-import threading
-import time
-from GUI import GUI
 random.seed(1.0)
 
-sub1 = plt.subplot(212)
-sub1.margins(0.05)           # Default margin is 0.05, value 0 means fit
-sub1.set_xlim([0, 100])
-sub1.set_ylim([-200, 200])
+class multpleScattering:
+	def __init__(self):
+		self.Length = 10
+		self.X, self.Y, self.Phi = 0,0,0
+		self.dX, self.dY, self.dPhi = 0,0,0
 
-sub2 = plt.subplot(221)
-sub2.set_title('Fitness')
-sub2.set_xlim([0, 40])
+	def start(self, X, Y, Phi, dX, dY, dPhi):
 
-sub3 = plt.subplot(222)
-sub3.set_title('y Residual')
+		self.sub1 = plt.subplot(212)
+		self.sub1.margins(0.05)           # Default margin is 0.05, value 0 means fit
+		self.sub1.set_xlim([0, 100])
+		self.sub1.set_ylim([-200, 200])
 
-residualLeavingBounds = []
+		self.sub2 = plt.subplot(221)
+		self.sub2.set_title('Fitness')
+		self.sub2.set_xlim([0, 40])
 
-designLength, designX, designY, designPhi = 0,0,0,0
-deltaX, deltaY, deltaPhi = 0,0,0
-initSimSpeed = 0
-programIsOn = False
+		self.sub3 = plt.subplot(222)
+		self.sub3.set_title('y Residual')
 
-while not(programIsOn):
-	gui = GUI(designLength, designX, designY, designPhi, deltaX, deltaY, deltaPhi, initSimSpeed, programIsOn)
-	gui.setUpGUI()
+		residualLeavingBounds = []
 
-def main():
-	thread = threading.Thread(target=gui.setUpGUI)
-	thread.start()
+		self.X, self.Y, self.Phi =  X, Y, Phi
+		self.Dx, self.Dy, self.dPhi = Dx, Dy, dPhi
 
-thread.join()
+		chamber1 = chamber(1, self.Length, self.X, self.Y, self.Phi, self.X+self.Dx, self.Y+self.Dy, self.Phi+self.dPhi, self.accuracy)
+		chamber1.plotChamber(sub1,sub2,sub3)
 
-chamber1 = chamber(1, designLength, designPhi, designX, designY, designPhi+deltaPhi, designX+deltaX, designY+deltaY)
-chamber1.plotChamber(sub1,sub2,sub3)
+		learningRates = [50,10,1.5]
+		stepSizes = [.01,.01,.01]
+		for i in range(400):
+			if chamber1.isDone():
+				#throw results
+				break
+			shootMuons(chamber1)
+			chamber1.align()
+			chamber1.resetData()
+			chamber1.cleanChamberPlot()
+			chamber1.plotChamber(sub1,sub2,sub3)
 
-	def shootMuons(chamber1, simSpeed):
+
+
+	def shootMuons(chamber1):
 		for i in range(nEvents):
 
 			if i%1000==0: print(i*1.0/nEvents)
@@ -78,7 +85,7 @@ chamber1.plotChamber(sub1,sub2,sub3)
 				trackPaths = sub1.plot(muonTrack[0],muonTrack[1], color='orange', label="track")
 				muonPaths = sub1.plot(muonPath[0],muonPath[1], marker = 'o', color='red', label="actual path")
 				legend = sub1.legend()
-				plt.pause(simSpeed)
+				plt.pause(0.01)
 				for muonPath in muonPaths:
 					muonPath.remove()
 				for trackPath in trackPaths:
@@ -88,59 +95,3 @@ chamber1.plotChamber(sub1,sub2,sub3)
 				#plt.clf()
 
 
-	learningRates = [50,10,1.5]
-	stepSizes = [.01,.01,.01]
-	for i in range(400):
-
-
-		shootMuons(chamber1)
-
-		#chamber1.alignGradDescent(learningRates, stepSizes)
-
-		chamber1.align()
-		#chamber1.align()
-		chamber1.resetData()
-
-		chamber1.cleanChamberPlot()
-		chamber1.plotChamber(sub1,sub2,sub3)
-
-
-
-		'''
-	xResidual = np.subtract( chamber1.hit[1], chamber1.track[1])
-	dxdyResidual = np.subtract( chamber1.hitXOverY, chamber1.trackXOverY)
-
-
-	plt.hist(xResidual)
-	plt.show()
-
-	plt.hist(dxdyResidual)
-	plt.show()
-
-	plt.scatter(xResidual,dxdyResidual, alpha=.1)
-	plt.show()
-	'''
-#output = {"length":designLength, "xDesign":chamber1.designX, "yDesign":chamber1.designY, "angleDesign":chamber1.designAngle, "xActual":chamber1.actualX, "yActual":chamber1.actualY, "angleActual":chamber1.actualAngle, "yHit": chamber1.hit[1], "yTrack":chamber1.track[1], "dxdyHit": chamber1.hitXOverY, "dxdyTrack":chamber1.trackXOverY}
-#
-#with open("output/chamber_residuals_nEvent_{}_des_{}_{}_{}_actual_{}_{}_{}.pickle".format(nEvents,chamber1.designX,chamber1.designY,chamber1.designAngle,chamber1.actualX,chamber1.actualY,chamber1.actualAngle), 'wb') as f:
-#    pickle.dump(output, f)
-
-
-
-
-
-# 100, math.pi/2, 50, 0
-# .01,5,0
-
-#plt.show()
-
-
-#sub1 = plt.subplot(212)
-#sub1.set_xlim([0, 100])
-#sub1.set_ylim([-100, 100])
-##sub1.axis([0, 100, -100, 100])
-#sub2 = plt.subplot(221)
-#sub2.set_xlim([0, 40])
-#sub3 = plt.subplot(222)
-#sub3.set_xlim([-10, 10])
-#sub2.plot([0,1])

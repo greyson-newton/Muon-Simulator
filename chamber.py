@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class chamber:
-    def __init__(self, idNumber, length, designAngle, designX, designY, actualAngle, actualX, actualY):
+    def __init__(self, idNumber, length, designX, designY, designAngle, actualX, actualY, actualAngle, accuracy):
         self.id = idNumber
         self.length = length
+        self.accuracy = accuracy
+        self.DONE = False
 
         self.designAngle = designAngle
         self.designX = designX
@@ -28,9 +30,6 @@ class chamber:
 
         self.fitness = []
         self.residualY = []
-
-
-
 
     def getResiduals(self, muonTrack, muonPath):
         #find predicted hit i.e. "track"
@@ -93,6 +92,8 @@ class chamber:
                     squaredDifference = np.power(predictedResidual - residualY,2)
                     squaredDifference = squaredDifference[~np.isnan(squaredDifference)]
                     stdDev = np.mean(squaredDifference)
+                    if self.DONE:
+                        break
                     if stdDev < minValue and not (xDis == 0 and yDis == 0 and angleDis ==0):
                         lowesState = [xDis,yDis, angleDis]
                         minValue  = stdDev
@@ -169,6 +170,10 @@ class chamber:
                     if minValue > stdDev:
                         minValue = stdDev
                         correctedPostion = [xDis, yDis, angleDis]
+                    if fabs(stdDev) < self.accuracy:
+                        print("Job Complete")
+                        self.DONE = True
+                        break
                     #print xDis, yDis, angleDis,stdDev  
 
         newX, newY, newAngle = correctedPostion[0], correctedPostion[1], correctedPostion[2] 
@@ -194,9 +199,6 @@ class chamber:
         self.track = [[],[]]
         self.trackXOverY = []
 
-
-
-
     def plotChamber(self,sub1,sub2,sub3):
  
         self.designPlot = sub1.plot(self.designEndpoints[0],self.designEndpoints[1], color='blue', label="design Chamber Postition")
@@ -212,4 +214,6 @@ class chamber:
             plot.remove()
         for plot in self.fitnessPlot:
             plot.remove()
+    def isDone(self):
+        return self.DONE
 

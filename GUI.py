@@ -1,95 +1,93 @@
 from tkinter import *
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+from multpleScattering import * 
 
 class GUI:
-	def __init__(self, length, initX, initY, initPhi, delX, delY, delPhi, initSimSpeed, isProgramOn):
-	
-		self.length, self.initX, self.initX, self.initY = length, initX, initY, initPhi
-		self.delX, self.delY, self.delPhi = delX, delY, delPhi
-		self.initSimSpeed = initSimSpeed
-		self.isProgramOn = isProgramOn
+	program = multpleScattering()
+	X, Y, Phi = 0,0,0
+	Dx, Dy, dPhi = 0,0,0
 
-	
-	def setUpGUI(self):
-		
-				
-		tb1 = DoubleVar()
-		tb2 = IntVar()
-		tb3 = IntVar()
-		tb4 = IntVar()
-		tb5 = DoubleVar()
-		tb6 = IntVar()
-		tb7 = IntVar()
-		tb8 = DoubleVar()
-		
-		window = Tk()
-		window.title("GUI")
-		window.geometry("800x200")
-		
-		# Simulation Speed
-		Label(window,text="Simulation Speed").grid(row=0,column=0)
-		Entry(window, textvariable = tb1).grid(row=0,column=1)
+	window = Tk()
+	window.title("GUI")
+	window.geometry("800x200")
 
-		# Length
-		Label(window,text="Length").grid(row=0,column=3)
-		Entry(window, textvariable = tb2).grid(row=0,column=4)
+	vcmdX = window.register(validateX)
+	vcmdY = window.register(validateY)
+	vcmdPhi = window.register(validatePhi)
+	vcmdDx = window.register(validateDx)
+	vcmdDy = window.register(validateDy)
+	vcmdDphi = window.register(validateDp)
 
+	designPosLabel = Label(window, text="Enter Design Pos:").grid(row=1, column=0)
+	actualPosLabel =Label(window, text="Enter Actual Pos:").grid(row=3, column=0)
 
-		# Init Pos
-		Label(window,text="InitX").grid(row=1,column=0)
-		Entry(window, textvariable=tb3).grid(row=1,column=1)
+	xLabel = Label(window,text="X").grid(row=0,column=1)
+	yLabel = Label(window,text="Y").grid(row=0,column=2)
+	phiLabel = Label(window,text="Phi").grid(row=0,column=3)
 
-		Label(window,text="InitY").grid(row=1,column=2)
-		Entry(window, textvariable=tb4).grid(row=1,column=3)
+	dxLabel = Label(window,text="DX").grid(row=2,column=1)
+	dyLabel = Label(window,text="DY").grid(row=2,column=2)
+	dPhiLabel = Label(window,text="DPhi").grid(row=2,column=3)
 
-		Label(window,text="InitPhi").grid(row=1,column=4)
-		Entry(window, textvariable=tb5).grid(row=1,column=5)
+	xEntry = Entry(window, validate="key", validatecommand=(vcmdX, '%P')).grid(row=1,column=1)
+	yEntry = Entry(window, validate="key", validatecommand=(vcmdY, '%P')).grid(row=1,column=3)
+	phiEntry = Entry(window, validate="key", validatecommand=(vcmdPhi, '%P')).grid(row=1,column=5)
 
+	dxEntry = Entry(window, validate="key", validatecommand=(vcmdDx, '%P')).grid(row=2,column=1)
+	dyEntry = Entry(window, validate="key", validatecommand=(vcmdDy, '%P')).grid(row=2,column=3)
+	dPhiEntry = Entry(window, validate="key", validatecommand=(vcmdDphi, '%P')).grid(row=2,column=5)
 
-		# Del Pos
-		Label(window,text="delX").grid(row=2,column=0)
-		Entry(window, textvariable=tb6).grid(row=2,column=1)
+	StartBtn = Button(window,text="Start", command=lambda: StartIsPressed()).grid(row=4,column=0)
+	EndBtn = Button(window, text="End", command=lambda: EndIsPressed()).grid(row=4, column=2)
 
-		Label(window,text="delY").grid(row=2,column=2)
-		Entry(window, textvariable=tb7).grid(row=2,column=3)
-
-		Label(window,text="delPhi").grid(row=2,column=4)
-		Entry(window, textvariable=tb8).grid(row=2,column=5)
-
-		# Parameters for alignment
-
-
-		# Start SIM Button
-		StartBtn = Button(window,text="Start SIM", command=lambda: StartIsPressed()).grid(row=3,column=0)
-
-	
-	def StartIsPressed(self):
+	def StartIsPressed():
 		print("Pressed")
-		self.initSimSpeed = tb1.get()
-		self.length = tb2.get()
-		self.initX = int(tb3.get())
-		self.initY = int(tb4.get())
-		self.initPhi = int(tb5.get())
-		self.delX = int(tb6.get())
-		self.delY = int(tb7.get())
-		self.delPhi = int(tb7.get())
-		print(self.initSimSpeed)
-		print(self.initX)
-		self.isProgramOn = True
-	
+		program.start(X, Y, Phi, Dx, Dy, Dp)
 
-	
-	
+	def validateX(var):
+		new_value = var.get()
+		if not(new_value is None):
+			try:
+				X = float(new_value)
+			except NameError:
+				raise ValueError("Detected Input But Could Not Append to Variable")
+	def validateY( var):
+		new_value = var.get()
+		if not(new_value is None):
+			try:
+				Y = float(new_value)
+			except NameError:
+				raise ValueError("Detected Input But Could Not Append to Variable")
+	def validatePhi( var):
+		new_value = var.get()
+		if not(new_value is None):
+			try:
+				Phi = float(new_value)
+			except NameError:
+				raise ValueError("Detected Input But Could Not Append to Variable")
+	def validateDx( var):
+		new_value = var.get()
+		if not(new_value is None):
+			try:
+				Dx = float(new_value)
+			except NameError:
+				raise ValueError("Detected Input But Could Not Append to Variable")
+	def validateDy( var):
+		new_value = var.get()
+		if not(new_value is None):
+			try:
+				Dy = float(new_value)
+			except NameError:
+				raise ValueError("Detected Input But Could Not Append to Variable")
+	def validateDphi( var):
+		new_value = var.get()
+		if not(new_value is None):
+			try:
+				Dphi = float(new_value)
+			except NameError:
+				raise ValueError("Detected Input But Could Not Append to Variable")
 
 
-
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 	
