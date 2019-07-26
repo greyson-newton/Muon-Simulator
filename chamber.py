@@ -1,9 +1,11 @@
 from geometry import *
 from constants import *
 from numba import jit
+from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
-import math
+import math, time
+
 
 class chamber:
     def __init__(self, idNumber, length, designX, designY, designAngle, actualX, actualY, actualAngle, accuracy):
@@ -11,16 +13,16 @@ class chamber:
         self.length = length
         self.accuracy = accuracy
         self.DONE = False
+        self.time = 0
 
         self.designAngle = designAngle
         self.designX = designX
         self.designY = designY
-        self.designEndpoints = [[designX-length/2*math.cos(designAngle),designX+length/2*math.cos(designAngle)],[designY-length/2*math.sin(designAngle),designY+length/2*math.sin(designAngle)]]
-
+        self.designEndpoints = [[self.designX-self.length/2*math.cos(self.designAngle),self.designX+self.length/2*math.cos(self.designAngle)],[self.designY-self.length/2*math.sin(self.designAngle),self.designY+self.length/2*math.sin(self.designAngle)]]
         self.actualAngle = actualAngle
         self.actualX = actualX
         self.actualY = actualY
-        self.actualEndpoints = [[actualX-length/2*math.cos(actualAngle),actualX+length/2*math.cos(actualAngle)],[actualY-length/2*math.sin(actualAngle),actualY+length/2*math.sin(actualAngle)]]
+        self.actualEndpoints = [[self.actualX-self.length/2*math.cos(self.actualAngle),self.actualX+self.length/2*math.cos(self.actualAngle)],[self.actualY-self.length/2*math.sin(self.actualAngle),self.actualY+self.length/2*math.sin(self.actualAngle)]]
 
         self.hit = [[],[]]
         self.hitXOverY = []
@@ -78,10 +80,6 @@ class chamber:
         possibleYDisplacements = [-stepSizes[1], 0, stepSizes[1]]
         possibleAngleDisplacements = [-stepSizes[2], 0, stepSizes[2]]
 
-
-
-        #possibleXDisplacements = [0]
-
         minValue = 1000
         lowesState = [0,0,0]
         noDisValue = 0
@@ -103,21 +101,9 @@ class chamber:
 
         distance = math.sqrt(lowesState[0]*lowesState[0] + lowesState[1]*lowesState[1] + lowesState[2]*lowesState[2])
         slope = abs(minValue-noDisValue)/distance
-
-
         deltaX, deltaY, deltaAngle =  lowesState[0]*slope*learningRates[0], lowesState[1]*slope*learningRates[1], lowesState[2]*slope*learningRates[2]
-        #slope = (xSTD[0] - xSTD[1])/2*stepSizes[0]
-        #deltaX = slope*learningRates[0]
-        #xDis = 0
-        #angleDis = 0
-        #print stdDev
 
-
-        #deltaX, deltaY, deltaAngle = 0,0,0
         newX, newY, newAngle = deltaX, deltaY, deltaAngle
-        print("design",  self.designX, self.designY, self.designAngle)
-        print("actual", self.actualX, self.actualY, self.actualAngle)
-        print("update", newX, newY, newAngle)
         self.designAngle = self.designAngle + newAngle
         self.designX = self.designX + newX
         self.designY = self.designY + newY
@@ -141,8 +127,6 @@ class chamber:
         self.track = [[],[]]
         self.trackXOverY = []
 
-
-
     def align(self):
 
         hitY = np.asarray(self.hit[1])
@@ -154,13 +138,6 @@ class chamber:
         possibleYDisplacements = np.linspace(-self.alignStep[1], self.alignStep[1], 10)
         possibleAngleDisplacements = np.linspace(-self.alignStep[2], self.alignStep[2], 10)
 
-        #possibleYDisplacements = [0]
-        #possibleXDisplacements = [0]
-        #possibleAngleDisplacements=[0]
-        #possibleXDisplacements = [-.01,.01]
-        #possibleYDisplacements = [-.01,.01]
-        #possibleAngleDisplacements = [-.01,.01]
-
         minValue = 100
         correctedPostion = [0,0,0]
         for xDis in possibleXDisplacements:
@@ -171,16 +148,16 @@ class chamber:
                     if minValue > stdDev:
                         minValue = stdDev
                         correctedPostion = [xDis, yDis, angleDis]
-                    if abs(stdDev) > 0.001:
+                    if abs(stdDev) < self.accuracy: 
                         print("Job Complete")
+                        print("design",  self.designX, self.designY, self.designAngle)
+                        print("actual", self.actualX, self.actualY, self.actualAngle)
                         self.DONE = True
                         break
                     #print xDis, yDis, angleDis,stdDev  
 
         newX, newY, newAngle = correctedPostion[0], correctedPostion[1], correctedPostion[2] 
-        print("design",  self.designX, self.designY, self.designAngle)
-        print("actual", self.actualX, self.actualY, self.actualAngle)
-        print("update", newX, newY, newAngle)
+
         self.designAngle = self.designAngle + newAngle
         self.designX = self.designX + newX
         self.designY = self.designY + newY
@@ -204,7 +181,8 @@ class chamber:
  
         self.designPlot = sub1.plot(self.designEndpoints[0],self.designEndpoints[1], color='blue', label="design Chamber Postition")
         self.actualPlot = sub1.plot(self.actualEndpoints[0],self.actualEndpoints[1], color='green', label="actual Chamber Postition")
-
+        print(self.designEndpoints[0], self.designEndpoints[1])
+        print(self.actualEndpoints[0], self.actualEndpoints[1])
         self.fitnessPlot = sub2.plot(self.fitness, color='black', label="fitness")
         self.residualPlot =  sub3.hist(self.residualY)
 
@@ -217,4 +195,6 @@ class chamber:
             plot.remove()
     def isDone(self):
         return self.DONE
+    def returnTime(self):
+        return self.time
 

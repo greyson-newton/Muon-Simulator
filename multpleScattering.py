@@ -2,8 +2,7 @@
 from numba import jit
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-import math
-import random
+import math, random, time
 from geometry import *
 from constants import *
 from iterateMuon import iterateMuon
@@ -11,7 +10,6 @@ from circleIntersectLine import circleIntersectLine
 from propagateMuon import propagateMuon
 from chamber import chamber
 import numpy as np
-from tkinter import *
 random.seed(1.0)
 
 class multpleScattering:
@@ -20,8 +18,10 @@ class multpleScattering:
 		self.X, self.Y, self.Phi = 0,0,0
 		self.dX, self.dY, self.dPhi = 0,0,0
 
-	def start(self, X, Y, Phi, Dx, Dy, Dphi):
 
+	def start(self, X, Y, Phi, Dx, Dy, Dphi, Length, Accuracy):
+
+		self.time = 0
 		self.sub1 = plt.subplot(212)
 		self.sub1.margins(0.05)           # Default margin is 0.05, value 0 means fit
 		self.sub1.set_xlim([0, 100])
@@ -39,24 +39,29 @@ class multpleScattering:
 		self.X, self.Y, self.Phi =  X, Y, Phi
 		self.Dx, self.Dy, self.dPhi = Dx, Dy, Dphi
 
-		self.accuracy = 0.00001
+		self.Length, self.Accuracy = Length, Accuracy
 
-		chamber1 = chamber(1, self.Length, self.X, self.Y, self.Phi, self.X+self.Dx, self.Y+self.Dy, self.Phi+self.dPhi, self.accuracy)
-		chamber1.plotChamber(self.sub1,self.sub2,self.sub3)
+		self.chamber1 = chamber(1, self.Length, self.X, self.Y, self.Phi, self.X+self.Dx, self.Y+self.Dy, self.Phi+self.dPhi, self.Accuracy)
+		self.chamber1.plotChamber(self.sub1,self.sub2,self.sub3)
 
 		learningRates = [50,10,1.5]
 		stepSizes = [.01,.01,.01]
+		startTime = time.time()
 		for i in range(400):
-			if chamber1.isDone():
-				#throw results
+			if self.chamber1.isDone():
+				endTime = time.time()
 				break
-			shootMuons(chamber1, self.sub1)
-			chamber1.align()
-			chamber1.resetData()
-			chamber1.cleanChamberPlot()
-			chamber1.plotChamber(self.sub1,self.sub2,self.sub3)
+			shootMuons(self.chamber1, self.sub1)
+			self.chamber1.align()
+			self.chamber1.resetData()
+			self.chamber1.cleanChamberPlot()
+			self.chamber1.plotChamber(self.sub1,self.sub2,self.sub3)
+		self.time = endTime-startTime
+	def reset(self):
+		self.chamber1.cleanChamberPlot()
 
-
+	def returnTime(self):
+		return self.time
 
 def shootMuons(chamber1, sub1):
 	for i in range(nEvents):
