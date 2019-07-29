@@ -97,7 +97,7 @@ def StartIsPressed():
 		time = round(program.returnTime(), 2)
 		timeResult.insert(0, str(time)) 
 		timeResult.insert(4, " seconds")
-		print("Elapsed Time: ", str(time), "\n", file=log)
+		print("Elapsed Time: ", str(time), " seconds\n", file=log)
 
 def ResetIsPressed():
 	timeResult.delete(0, END)
