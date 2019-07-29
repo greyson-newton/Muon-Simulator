@@ -14,6 +14,7 @@ class chamber:
         self.accuracy = accuracy
         self.DONE = False
         self.time = 0
+        self.stdDeviation = 0
 
         self.designAngle = designAngle
         self.designX = designX
@@ -90,7 +91,6 @@ class chamber:
                     predictedResidual =  yDis - dxdyTrack*xDis + hitY*dxdyTrack*angleDis
                     squaredDifference = np.power(predictedResidual - residualY,2)
                     squaredDifference = squaredDifference[~np.isnan(squaredDifference)]
-                    stdDev = np.mean(squaredDifference)
                     if self.DONE:
                         break
                     if stdDev < minValue and not (xDis == 0 and yDis == 0 and angleDis ==0):
@@ -115,8 +115,7 @@ class chamber:
         if abs(newAngle) < self.alignStep[2]/2:
             self.alignStep[2] = self.alignStep[2]/2
 
-        self.fitness.append(stdDev)
-        self.residualY = residualY
+
 
 
     def resetData(self):
@@ -145,13 +144,17 @@ class chamber:
                 for angleDis in possibleAngleDisplacements:
                     predictedResidual =  yDis - dxdyTrack*xDis + hitY*dxdyTrack*angleDis
                     stdDev = np.mean(np.power(predictedResidual - residualY,2))
+                    self.fitness.append(stdDev)
+                    self.residualY = predictedResidual 
                     if minValue > stdDev:
                         minValue = stdDev
                         correctedPostion = [xDis, yDis, angleDis]
                     if abs(stdDev) < self.accuracy: 
                         print("Job Complete")
-                        print("design",  self.designX, self.designY, self.designAngle)
-                        print("actual", self.actualX, self.actualY, self.actualAngle)
+                        print(self.fitness)
+                        print("stdev", stdDev)
+                        #print("design",  self.designX, self.designY, self.designAngle)
+                        #print("actual", self.actualX, self.actualY, self.actualAngle)
                         self.DONE = True
                         break
                     #print xDis, yDis, angleDis,stdDev  
@@ -181,8 +184,6 @@ class chamber:
  
         self.designPlot = sub1.plot(self.designEndpoints[0],self.designEndpoints[1], color='blue', label="design Chamber Postition")
         self.actualPlot = sub1.plot(self.actualEndpoints[0],self.actualEndpoints[1], color='green', label="actual Chamber Postition")
-        print(self.designEndpoints[0], self.designEndpoints[1])
-        print(self.actualEndpoints[0], self.actualEndpoints[1])
         self.fitnessPlot = sub2.plot(self.fitness, color='black', label="fitness")
         self.residualPlot =  sub3.hist(self.residualY)
 

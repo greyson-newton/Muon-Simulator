@@ -13,26 +13,16 @@ import numpy as np
 random.seed(1.0)
 
 class multpleScattering:
-	def __init__(self):
+	def __init__(self, figure, sub1, sub2, sub3):
 		self.Length = 10
 		self.X, self.Y, self.Phi = 0,0,0
 		self.dX, self.dY, self.dPhi = 0,0,0
-
+		self.figure = figure
+		self.sub1, self.sub2, self.sub3 = sub1, sub2, sub3
 
 	def start(self, X, Y, Phi, Dx, Dy, Dphi, Length, Accuracy):
 
 		self.time = 0
-		self.sub1 = plt.subplot(212)
-		self.sub1.margins(0.05)           # Default margin is 0.05, value 0 means fit
-		self.sub1.set_xlim([0, 100])
-		self.sub1.set_ylim([-200, 200])
-
-		self.sub2 = plt.subplot(221)
-		self.sub2.set_title('Fitness')
-		self.sub2.set_xlim([0, 40])
-
-		self.sub3 = plt.subplot(222)
-		self.sub3.set_title('y Residual')
 
 		residualLeavingBounds = []
 

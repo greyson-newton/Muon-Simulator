@@ -1,8 +1,24 @@
 from tkinter import *
+import matplotlib.pyplot as plt
 from multpleScattering import * 
 import math
 import datetime
 import os
+
+fig = plt.figure(figsize=(10,6))
+
+sub1 = plt.subplot(212)
+sub1.margins(0.05)
+sub1.set_xlim([0,100])
+sub1.set_ylim([-200, 200])
+
+sub2 = plt.subplot(221)
+sub2.set_title('Fitness')
+
+
+sub3 = plt.subplot(222)
+sub3.set_title('y Residual')
+
 
 window = Tk()
 window.title("GUI")
@@ -14,7 +30,7 @@ except:
 	print("log cant open")
 
 
-program = multpleScattering()
+program = multpleScattering(fig, sub1, sub2 , sub3)
 X, Y, Phi = 0,0,0
 Dx, Dy, dPhi = 0,0,0
 count = 0
@@ -55,6 +71,7 @@ yEntry.insert(0, "0")
 phiEntry = Entry(window)
 phiEntry.grid(row=3,column=3)
 phiEntry.insert(0, "90")
+phiEntry.config(state='readonly')
 
 dxEntry = Entry(window)
 dxEntry.grid(row=5,column=1)
@@ -72,16 +89,25 @@ ShowBtn = Button(window, text="Log", command=lambda:ShowIsPushed()).grid(row = 9
 def StartIsPressed():
 	global count
 	count+=1
-	print(count, "\n", file=log)
-	print(str(xEntry.get()) , ",", str(yEntry.get()), "," , str(float(phiEntry.get())*(math.pi/180)) , ",", str(dxEntry.get()) , "," , str(dyEntry.get()) , ",", str(float(dPhiEntry.get())*(math.pi/180)), ",", str(accuracyEntry.get()), "\n", file=log)
+	print("#", count, "\n", file=log)
+	print("Design Position: " ,str(xEntry.get()) , ",", str(yEntry.get()), "," , str(float(phiEntry.get())*(math.pi/180)) , "\nActual Position: ", str(dxEntry.get()) , "," , str(dyEntry.get()) , ",", str(float(dPhiEntry.get())*(math.pi/180)), "\n", file=log)
+	print("Accuracy: ", str(accuracyEntry.get()), "Length: ", str(lengthEntry.get()), file=log)
 	program.start(float(xEntry.get()), float(yEntry.get()), float(phiEntry.get())*(math.pi/180),  float(dxEntry.get()),  float(dyEntry.get()), float(dPhiEntry.get())*(math.pi/180), int(lengthEntry.get()), float(accuracyEntry.get()))
 	if program.chamber1.isDone():
-		timeResult.insert(0, str(program.returnTime()))
+		time = round(program.returnTime(), 2)
+		timeResult.insert(0, str(time)) 
+		timeResult.insert(4, " seconds")
+		print("Elapsed Time: ", str(time), "\n", file=log)
 
 def ResetIsPressed():
-	print(timeResult.get(), "\n", file=log)
 	timeResult.delete(0, END)
-	program.reset()
+	sub1.cla()
+	sub2.cla()
+	sub3.cla()
+	sub1.set_xlim([0,100])
+	sub1.set_ylim([-200, 200])
+	sub2.set_title('Fitness')
+	sub3.set_title('Y Residual')
 def ShowIsPushed():
 	global filename
 	log.close()
