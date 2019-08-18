@@ -1,0 +1,62 @@
+x, y, phi = 50, 0, 90
+
+DxRange = np.linspace(0,10)
+DyRange = np.linspace(-15,15)
+DpRange = np.linspace(90, 450)
+
+Length = 100
+Accuracy = 0.0001
+
+times[]
+xPos[]
+yPos[]
+phiPos[]
+
+calculate()
+analyze()
+
+
+def calculate()
+count = 0
+for dx in DxRange:
+	for dy in DyRange:
+		for dp in DphiRange:
+			program = multpleScattering(x,y,phi,DxRange[dx], DyRange[dy], DphiRange[dp], length, accuracy)
+			times[count] = program.returnTime()
+			DxPos[count] = DxRange[dx]
+			DyPos[count] = DyRange[dy]
+			DphiPos[count] = DphiRange[dp]
+			count+=count
+
+def analyze()
+minTimeOne = 10
+minTimeTwo = 10
+minTimeThree = 10
+
+minCoordinatesOne[] = 0,0,0
+minCoordinatesTwo[] = 0,0,0
+minCoordinatesThree[] = 0,0,0
+
+minTimeOneIndex = 0
+minTimeTwoIndex = 0
+minTimeThreeIndex = 0
+
+for time in times[]:
+	if times[time] < minTimeOne:
+		minTimeOne = times[time]
+		minCoordinatesOne = [xPos[time], yPos[time], phiPos[time]]
+		minTimeOneIndex = time
+times[minTimeOneIndex].remove()
+for time in times[]:
+	if times[time] < minTimeTwo:
+		minTimeTwo = times[time]
+		minCoordinatesTwo = [xPos[time], yPos[time], phiPos[time]]
+		minTimeTwoIndex = time
+times[minTimeTwoIndex].remove()
+for time in times[]:
+	if times[time] < minTimeThree:
+		minTimeThree = times[time]
+		minCoordinatesThree = [xPos[time], yPos[time], phiPos[time]]
+		minTimeThreeIndex = time
+time[minTimeThreeIndex].remove()
+

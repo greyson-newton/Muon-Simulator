@@ -115,6 +115,9 @@ class chamber:
         if abs(newAngle) < self.alignStep[2]/2:
             self.alignStep[2] = self.alignStep[2]/2
 
+
+
+
     def resetData(self):
         #print "design after align",  self.designX, self.designY, self.designAngle, self.designEndpoints
         self.hit = [[],[]]
@@ -147,9 +150,9 @@ class chamber:
                         minValue = stdDev
                         correctedPostion = [xDis, yDis, angleDis]
                     if abs(stdDev) < self.accuracy: 
-                        #print("Job Complete")
-                        #print(self.fitness)
-                        #print("stdev", stdDev)
+                        print("Job Complete")
+                        print(self.fitness)
+                        print("stdev", stdDev)
                         #print("design",  self.designX, self.designY, self.designAngle)
                         #print("actual", self.actualX, self.actualY, self.actualAngle)
                         self.DONE = True
@@ -170,18 +173,33 @@ class chamber:
         if abs(newAngle) < self.alignStep[2]/2:
             self.alignStep[2] = self.alignStep[2]/2
 
-        #print("design after align",  self.designX, self.designY, self.designAngle, self.designEndpoints)
+        print("design after align",  self.designX, self.designY, self.designAngle, self.designEndpoints)
         self.hit = [[],[]]
         self.hitXOverY = []
 
         self.track = [[],[]]
         self.trackXOverY = []
 
+    def plotChamber(self,sub1,sub2,sub3):
+ 
+        self.designPlot = sub1.plot(self.designEndpoints[0],self.designEndpoints[1], color='blue', label="design Chamber Postition")
+        self.actualPlot = sub1.plot(self.actualEndpoints[0],self.actualEndpoints[1], color='green', label="actual Chamber Postition")
+        #self.fitnessPlot = sub2.plot(self.fitness, color='black', label="fitness")
+        #self.residualPlot =  sub3.hist(self.residualY)
+
+    def cleanChamberPlot(self):
+        for plot in self.designPlot:
+            plot.remove()
+        for plot in self.actualPlot:
+            plot.remove()
+        for plot in self.fitnessPlot:
+            plot.remove()
     def isDone(self):
         return self.DONE
     def returnTime(self):
         return self.time
-    def returnDesignEndpoints(self):
-        return self.designEndpoints
-    def returnActualEndpoints(self):
+    def returnDesignEndPoints(self):
+        return self.designEndpoint
+    def returnActualEndPoints(self):
         return self.actualEndpoints
+
